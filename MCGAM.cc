@@ -14,9 +14,9 @@ namespace Rivet {
   public:
 
     /// Default constructor
-    MCGAM()
-      : Analysis("MCGAM")
-    {    }
+    MCGAM(const string & name="MCGAM", size_t mode=0)
+      : Analysis(name)
+    {  m_modus = mode;  }
 
 
     /// @name Analysis methods
@@ -91,13 +91,15 @@ namespace Rivet {
         MSG_INFO(photons);
       //  vetoEvent;
       } */
-      const FourMomentum photon = photons.front().momentum();
+      FourMomentum photon = photons.front().momentum();
 
+
+      /*
        MSG_INFO("number of photons" << photontest.size() );
        MSG_INFO("hardest photon: " << photon);
        MSG_INFO("matched photon: " << selected_photon);
        MSG_INFO("dr = " << dr << "\n");
-
+      */
       // Get all charged particles
       const FinalState& fs = apply<FinalState>(e, "JetFS");
       if (fs.empty()) {
@@ -106,6 +108,10 @@ namespace Rivet {
 
       // Passed cuts, so get the weight
       const double weight = e.weight();
+
+      // switch to matched photon if modus=1
+      if(m_modus==1) photon = selected_photon.momentum();
+
 
       _h_photon_pT->fill(photon.pT(),weight);
       _h_photon_pT_lin->fill(photon.pT(),weight);
@@ -130,6 +136,7 @@ namespace Rivet {
     Histo1DPtr _h_photon_pT;
     Histo1DPtr _h_photon_pT_lin;
     Histo1DPtr _h_photon_y;
+    size_t m_modus;
     //@}
 
   };
@@ -138,5 +145,16 @@ namespace Rivet {
 
   // The hook for the plugin system
   DECLARE_RIVET_PLUGIN(MCGAM);
+
+
+  class MCGAM_MATCH : public MCGAM {
+  public:
+    MCGAM_MATCH()
+      :MCGAM("MCGAM_MATCH",1)
+    {   }
+  };
+
+  DECLARE_RIVET_PLUGIN(MCGAM_MATCH);
+
 
 }
