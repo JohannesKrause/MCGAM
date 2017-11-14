@@ -56,12 +56,21 @@ namespace Rivet {
       const Particles photons = apply<FinalState>(e, "LeadingPhoton").particles();
       if (photons.size() < 1) vetoEvent;
 
-      /*const Particles photontest = apply<FinalState>(e, "Photon_Test").particlesByPt();
-      if (photontest.size()!=photons.size()){
+      const Particles photontest = apply<FinalState>(e, "Photon_Test").particlesByPt();
+      /*if (photontest.size()!=photons.size()){
           MSG_INFO("  ################ Unterschied: ###########################  ");
           MSG_INFO(photons);
           MSG_INFO(photontest);
       }*/
+      const GenEvent* evt = event.genEvent();
+      for (HepMC::GenEvent::particle_const_iterator p = evt->particles_begin(); p != evt->particles_end(); ++p) {
+        if ((*p)->status()!=3) continue;
+        if ( (*p)->pdg_id()!=22) continue;
+        double p_px = (*p)->momentum().px();
+        double p_py = (*p)->momentum().py();
+        double p_pz = (*p)->momentum().pz();
+        double p_pe = (*p)->momentum().e();
+
 
 
       if (photons.size() != 1) {
