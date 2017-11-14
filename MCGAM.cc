@@ -2,6 +2,7 @@
 #include "Rivet/Analysis.hh"
 #include "Rivet/Projections/LeadingParticlesFinalState.hh"
 #include "Rivet/Projections/VetoedFinalState.hh"
+#include "Rivet/Projections/IdentifiedFinalState.hh"
 
 namespace Rivet {
 
@@ -32,6 +33,12 @@ namespace Rivet {
       photonfs.addParticleId(PID::PHOTON);
       declare(photonfs, "LeadingPhoton");
 
+
+      //test: identified final state
+      IdentifiedFinalState photons_test(Cuts::abseta < 5.0 && Cuts::pT > 10*GeV);
+      photons_test.acceptId(PID::PHOTON);
+      declare(photons_test, "Photon_Test");
+
       // FS for isolation excludes the leading photon
       VetoedFinalState vfs(fs);
       vfs.addVetoOnThisFinalState(photonfs);
@@ -49,6 +56,14 @@ namespace Rivet {
       const Particles photons = apply<FinalState>(e, "LeadingPhoton").particles();
       if (photons.size() < 1) vetoEvent;
 
+      /*const Particles photontest = apply<FinalState>(e, "Photon_Test").particlesByPt();
+      if (photontest.size()!=photons.size()){
+          MSG_INFO("  ################ Unterschied: ###########################  ");
+          MSG_INFO(photons);
+          MSG_INFO(photontest);
+      }*/
+
+
       if (photons.size() != 1) {
         MSG_INFO("strange: not exactly one leading photon");
         MSG_INFO(photons);
@@ -64,19 +79,6 @@ namespace Rivet {
 
       // Passed cuts, so get the weight
       const double weight = e.weight();
-
-      // Isolate photon by ensuring that a 0.4 cone around it contains less than 7% of the photon's energy
-      //const double egamma = photon.E();
-      //double econe = 0.0;
-      //foreach (const Particle& p, fs.particles()) {
-      //  if (deltaR(photon, p.momentum()) < 0.4) {
-      //    econe += p.E();
-          // Veto as soon as E_cone gets larger
-      //    if (econe/egamma > 0.07) {
-      //      vetoEvent;
-      //    }
-      //  }
-      //}
 
       _h_photon_pT->fill(photon.pT(),weight);
       _h_photon_pT_lin->fill(photon.pT(),weight);
