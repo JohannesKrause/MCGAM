@@ -62,23 +62,41 @@ namespace Rivet {
           MSG_INFO(photons);
           MSG_INFO(photontest);
       }*/
-      const GenEvent* evt = event.genEvent();
+
+      // find four vector of phootn from ME
+      FourMomentum photon_me;
+      const GenEvent* evt = e.genEvent();
       for (HepMC::GenEvent::particle_const_iterator p = evt->particles_begin(); p != evt->particles_end(); ++p) {
         if ((*p)->status()!=3) continue;
         if ( (*p)->pdg_id()!=22) continue;
-        double p_px = (*p)->momentum().px();
-        double p_py = (*p)->momentum().py();
-        double p_pz = (*p)->momentum().pz();
-        double p_pe = (*p)->momentum().e();
+        photon_me = (*p)->momentum();
+
+      }
+
+
+      // perform dr matching
+      double dr(9999999);
+      Particle selected_photon;
+      foreach (const Particle & test_photon, photontest) {
+         if  (deltaR(photon_me,test_photon)< dr){
+           selected_photon = test_photon;
+           dr = deltaR(photon_me,test_photon);
+         }
+        }
 
 
 
-      if (photons.size() != 1) {
+    /*  if (photons.size() != 1) {
         MSG_INFO("strange: not exactly one leading photon");
         MSG_INFO(photons);
       //  vetoEvent;
-      }
+      } */
       const FourMomentum photon = photons.front().momentum();
+
+       MSG_INFO("number of photons" << photontest.size() );
+       MSG_INFO("hardest photon: " << photon);
+       MSG_INFO("matched photon: " << selected_photon);
+       MSG_INFO("dr = " << dr << "\n");
 
       // Get all charged particles
       const FinalState& fs = apply<FinalState>(e, "JetFS");
